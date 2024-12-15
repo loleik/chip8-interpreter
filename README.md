@@ -8,5 +8,5 @@ This is my chip-8 interpreter written in rust. Just intended as a small project 
 + `0xDxyn`
 
 ## Planned:
-+ Other opcodes, obvious.
++ Other opcodes, obviously.
 + CLAP interface for passing ROMs.
