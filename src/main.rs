@@ -23,7 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
 
     let mut event_pump: sdl2::EventPump = sdl_content.event_pump().unwrap();
 
-    let mut emulator: Emulator = load("1-chip8-logo.ch8", canvas);
+    let mut emulator: Emulator = load("roms/3-corax+.ch8", canvas);
     let mut cycles: i32 = 0;
 
     println!("┏━━━━━━┯━━━━━━━━━━━┯━━━━━━━━━━━┓");
@@ -46,11 +46,13 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
         let instruction: u16 = fetch(&mut emulator);
         decode(&mut emulator, instruction);
 
+        
+
         cycles += 1;
 
-        if cycles == 39 {
+        /*if cycles == 20 {
             break;
-        }
+        }*/
     }
 
     println!("┗━━━━━━┷━━━━━━━━━━━┷━━━━━━━━━━━┛");
