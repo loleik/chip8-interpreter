@@ -280,6 +280,10 @@ pub fn a_nnn(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     emulator
 }
 
+// Jump to location nnn + V0.
+
+// Set Vx = random byte AND kk.
+
 // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
 pub fn d_x_y_n(
     opcode: u16, 
@@ -333,6 +337,37 @@ pub fn d_x_y_n(
     emulator
 }
 
+// Skip next instruction if key with the value of Vx is pressed.
+
+// Skip next instruction if key with the value of Vx is not pressed.
+
+// Set Vx = delay timer value.
+pub fn f_x_07(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    let x: usize = ((opcode & 0x0F00) >> 8) as usize;
+
+    emulator.vx[x] = emulator.delay;
+    
+    emulator
+}
+
+// Set delay timer = Vx.
+pub fn f_x_15(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    let x: usize = ((opcode & 0x0F00) >> 8) as usize;
+
+    emulator.delay = emulator.vx[x];
+
+    emulator
+}
+
+// Set sound timer = Vx.
+pub fn f_x_18(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    let x: usize = ((opcode & 0x0F00) >> 8) as usize;
+
+    emulator.sound = emulator.vx[x];
+
+    emulator
+}
+
 // Set I = I + Vx.
 pub fn f_x_1e(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
@@ -342,6 +377,7 @@ pub fn f_x_1e(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     emulator
 }
 
+// Set I = location of sprite for digit Vx.
 /*pub fn f_x_29(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     println!("┃ {opcode:04X} │ LD        │ F, V{x:01X}      ┃");
 

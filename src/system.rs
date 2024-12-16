@@ -140,6 +140,9 @@ pub fn decode(
 
         0xF000 => {
             match suffix {
+                0x0007 => f_x_07(instruction, emulator),
+                0x0015 => f_x_15(instruction, emulator),
+                0x0018 => f_x_18(instruction, emulator),
                 0x001E => f_x_1e(instruction, emulator),
                 0x0033 => f_x_33(instruction, emulator),
                 0x0055 => f_x_55(instruction, emulator),
