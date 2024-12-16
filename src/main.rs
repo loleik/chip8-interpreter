@@ -5,6 +5,29 @@ use sdl2::keyboard::Keycode;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+// Map sdl2 keycodes to chip8 keycodes.
+fn map_keys(key: Keycode) -> Option<u8> {
+    match key {
+        Keycode::NUM_1 => Some(0x1),
+        Keycode::NUM_2 => Some(0x2),
+        Keycode::NUM_3 => Some(0x3),
+        Keycode::NUM_4 => Some(0xC),
+        Keycode::Q => Some(0x4),
+        Keycode::W => Some(0x5),
+        Keycode::E => Some(0x6),
+        Keycode::R => Some(0xD),
+        Keycode::A => Some(0x7),
+        Keycode::S => Some(0x8),
+        Keycode::D => Some(0x9),
+        Keycode::F => Some(0xE),
+        Keycode::Z => Some(0xA),
+        Keycode::X => Some(0x0),
+        Keycode::C => Some(0xB),
+        Keycode::V => Some(0xF),
+        _ => None,
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
     // SDL2 variables for setting up the window and canvas.
     let sdl_content: sdl2::Sdl = sdl2::init().unwrap();
@@ -34,13 +57,25 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
     println!("┠──────┼───────────┼───────────┨ ");
 
     // Main loop, labeled for breaking on ESC.
-    'running: loop { 
+    'running: loop {
+        emulator.memory[0x1FF] = 1;
+
         // Even pump for checking keypresses.
         if let Some(event) =  event_pump.poll_event() {
             match event {
                 Event::Quit { .. } |
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     break 'running;
+                },
+                Event::KeyDown { keycode: Some(key), .. } => {
+                    if let Some(index) = map_keys(key) {
+                        emulator.keypad[index as usize] = true;
+                    }
+                },
+                Event::KeyUp { keycode: Some(key), .. } => {
+                    if let Some(index) = map_keys(key) {
+                        emulator.keypad[index as usize] = false;
+                    }
                 },
                 _ => {}
             }
@@ -49,6 +84,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
         // Fetch the instruction, and pass it to the decode function along with the emulator.
         let instruction: u16 = fetch(&mut emulator);
         decode(&mut emulator, instruction);
+        
+        update_timers(&mut emulator); // Update the timers.
 
         // Again, not really needed outside of the first few test ROMs.
         //cycles += 1;

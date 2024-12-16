@@ -3,6 +3,8 @@ use crate::opcodes::*;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use std::fs;
+use std::time::Instant;
+use std::time::Duration;
 
 // The common CHIP-8 font set.
 pub const FONT: [u8; 80] = [
@@ -39,7 +41,9 @@ pub struct Emulator {
     pub sound: u8, // 8 bit sound timer.
     pub stack: [u16; 16], // 16 bit stack array.
     pub display: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT], // 64 x 32 display array.
-    pub canvas: Canvas<Window> // Canvas for drawing during execution.
+    pub keypad: [bool; 16], // 16 key CHIP-8 keypad array.
+    pub canvas: Canvas<Window>, // Canvas for drawing during execution.
+    pub last_timer_update: Instant
 }
 
 // Creates a new emulator instance (again I know, interpreter haha).
@@ -56,9 +60,35 @@ impl Emulator {
             sound: 0,
             stack: [0; 16],
             display: [[0; SCREEN_WIDTH]; SCREEN_HEIGHT],
-            canvas: canvas
+            keypad: [false; 16],
+            canvas: canvas,
+            last_timer_update: Instant::now(),
         }
     }
+}
+
+pub fn update_timers(emulator: &mut Emulator) -> &mut Emulator {
+    let elapsed: std::time::Duration = emulator.last_timer_update.elapsed();
+
+    if elapsed >= Duration::from_secs_f32(1.0 / 60.0) {
+        if emulator.delay > 0 {
+            emulator.delay -= 1;
+        }
+
+        if emulator.sound > 0 {
+            emulator.sound -= 1;
+
+            if emulator.sound == 0 {
+                println!();
+                println!("BEEP");
+                println!();
+            }
+        }
+    }
+
+    emulator.last_timer_update = Instant::now();
+
+    emulator
 }
 
 // Function for loading the emulator struct, then loading the ROM into memory.
@@ -100,13 +130,14 @@ pub fn decode(
 
     // Common parts of instructions for matching.
     let most_significant: u16 = instruction & 0xF000;
+
     let suffix: u16 = instruction & 0x00FF;
     let least_significant: u16 = instruction & 0x000F;
 
     // Big match statement for passing instructions through to their respective functions.
     return match most_significant {
         0x0000 => {
-            match suffix {
+            match instruction {
                 0x00E0 => e_0(emulator), 
                 0x00EE => e_e(emulator), 
                 _ => unknown(instruction, emulator),
@@ -135,14 +166,23 @@ pub fn decode(
         }
         0x9000 => nine_x_y_0(instruction, emulator),
         0xA000 => a_nnn(instruction, emulator),
-
+        0xB000 => b_nnn(instruction, emulator),
+        0xC000 => c_x_kk(instruction, emulator),
         0xD000 => d_x_y_n(instruction, emulator),
-
+        0xE000 => {
+            match suffix {
+                0x009E => e_x_9e(instruction, emulator),
+                0x00A1 => e_x_a1(instruction, emulator),
+                _ => unknown(instruction, emulator),
+            }
+        }
         0xF000 => {
             match suffix {
                 0x0007 => f_x_07(instruction, emulator),
+                0x000A => f_x_0a(instruction, emulator),
                 0x0015 => f_x_15(instruction, emulator),
                 0x0018 => f_x_18(instruction, emulator),
+                0x0029 => f_x_29(instruction, emulator),
                 0x001E => f_x_1e(instruction, emulator),
                 0x0033 => f_x_33(instruction, emulator),
                 0x0055 => f_x_55(instruction, emulator),

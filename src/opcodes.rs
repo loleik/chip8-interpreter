@@ -9,12 +9,11 @@ use std::thread;
 pub fn e_0(emulator: &mut Emulator) -> &mut Emulator {
     println!("┃ 00E0 │ CLS       │           ┃");
 
-    for y in 0..emulator.display.len() {
-        for x in 0..emulator.display[0].len() {
-            emulator.display[y][x] = 0
-        }
+    for y in emulator.display.iter_mut() {
+        y.fill(0);
     }
 
+    emulator.canvas.set_draw_color(Color::RGB(0, 0, 0));
     emulator.canvas.clear();
 
     emulator
@@ -157,7 +156,7 @@ pub fn eight_x_y_3(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
     let y: usize = ((opcode & 0x00F0) >> 4) as usize;
 
-    println!("┃ {opcode:04X} │ XOR       │ V{x:01X}, V{y:01X}   ┃");
+    println!("┃ {opcode:04X} │ XOR       │ V{x:01X}, V{y:01X}    ┃");
 
     emulator.vx[x] = emulator.vx[x] ^ emulator.vx[y];
 
@@ -169,7 +168,7 @@ pub fn eight_x_y_4(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
     let y: usize = ((opcode & 0x00F0) >> 4) as usize;
 
-    println!("┃ {opcode:04X} │ ADD       │ V{x:01X}, V{y:01X}   ┃");
+    println!("┃ {opcode:04X} │ ADD       │ V{x:01X}, V{y:01X}    ┃");
 
     let result: (u8, bool) = emulator.vx[x].overflowing_add(emulator.vx[y]);
 
@@ -280,23 +279,29 @@ pub fn a_nnn(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     emulator
 }
 
-// Jump to location nnn + V0.
-
 // Set Vx = random byte AND kk.
+pub fn b_nnn(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    let _nnn: u16 = opcode & 0x0FFF;
+
+    panic!("{opcode:04X}");
+}
+
+// Jump to location nnn + V0.
+pub fn c_x_kk(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    let _x: usize = ((opcode & 0x0F00) >> 8) as usize;
+    let _kk: u16 = opcode & 0x00FF;
+
+    panic!("{opcode:04X}");
+}
 
 // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-pub fn d_x_y_n(
-    opcode: u16, 
-    emulator: &mut Emulator,
-) -> &mut Emulator {
+pub fn d_x_y_n(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
     let vx: usize = emulator.vx[x] as usize;
     let y: usize = ((opcode & 0x00F0) >> 4) as usize;
     let vy: usize = emulator.vx[y] as usize;
     let n: u16 = opcode & 0x000F;
     let i: u16 = emulator.i;
-    emulator.canvas.set_draw_color(Color::RGB(255, 179, 71));
-    emulator.canvas.present();
 
     println!("┃ {opcode:04X} │ DRW       │ V{x:01X}, V{y:01X}, {n:01X} ┃");
 
@@ -325,27 +330,68 @@ pub fn d_x_y_n(
                     (row * 10) as i32, 
                     10,
                     10);
+                emulator.canvas.set_draw_color(Color::RGB(255, 179, 71));
                 emulator.canvas.fill_rect(rect).unwrap();
             }
         }
     }
-
-    emulator.canvas.present(); // Update the screen
     
+    emulator.canvas.present(); // Update the screen
     thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
 
     emulator
 }
 
 // Skip next instruction if key with the value of Vx is pressed.
+pub fn e_x_9e(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    let x: usize = ((opcode & 0x0F00) >> 8) as usize;
+
+    println!("┃ {opcode:04X} │ SKP       │ V{x:01X}        ┃");
+
+    if emulator.keypad[emulator.vx[x] as usize] { emulator.pc += 2 }
+
+    emulator
+}
 
 // Skip next instruction if key with the value of Vx is not pressed.
+pub fn e_x_a1(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    let x: usize = ((opcode & 0x0F00) >> 8) as usize;
+
+    println!("┃ {opcode:04X} │ SKNP      │ V{x:01X}        ┃");
+
+    if !emulator.keypad[emulator.vx[x] as usize] { emulator.pc += 2 }
+
+    emulator
+}
 
 // Set Vx = delay timer value.
 pub fn f_x_07(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
 
+    println!("┃ {opcode:04X} │ LD        │ V{x:01X}, DT    ┃");
+
     emulator.vx[x] = emulator.delay;
+    
+    emulator
+}
+
+// Wait for a key press, store the value of the key in Vx.
+pub fn f_x_0a(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    let x: usize = ((opcode & 0x0F00) >> 8) as usize;
+
+    println!("┃ {opcode:04X} │ LD        │ V{x:01X}, K      ┃");
+
+    let mut key_pressed: bool = false;
+
+    for key in 0..emulator.keypad.len() {
+        if emulator.keypad[key] {
+            emulator.vx[x] = key as u8;
+            key_pressed = true;
+            break;
+        }
+    }
+
+    if key_pressed { emulator.pc -= 2 }
     
     emulator
 }
@@ -353,6 +399,8 @@ pub fn f_x_07(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
 // Set delay timer = Vx.
 pub fn f_x_15(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
+
+    println!("┃ {opcode:04X} │ LD        │ DT, V{x:01X}    ┃");
 
     emulator.delay = emulator.vx[x];
 
@@ -363,6 +411,8 @@ pub fn f_x_15(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
 pub fn f_x_18(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
 
+    println!("┃ {opcode:04X} │ LD        │ ST, V{x:01X}     ┃");
+
     emulator.sound = emulator.vx[x];
 
     emulator
@@ -372,19 +422,21 @@ pub fn f_x_18(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
 pub fn f_x_1e(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
 
+    println!("┃ {opcode:04X} │ ADD       │ [I], V{x:01X}   ┃");
+
     emulator.i += emulator.vx[x] as u16;
 
     emulator
 }
 
 // Set I = location of sprite for digit Vx.
-/*pub fn f_x_29(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
-    println!("┃ {opcode:04X} │ LD        │ F, V{x:01X}      ┃");
+pub fn f_x_29(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    //println!("┃ {opcode:04X} │ LD        │ F, V{x:01X}      ┃");
 
-
+    panic!("{opcode:04X}");
 
     emulator
-}*/
+}
 
 // Store BCD representation of Vx in memory locations I, I+1, and I+2.
 pub fn f_x_33(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
@@ -403,7 +455,7 @@ pub fn f_x_33(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
 pub fn f_x_55(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
 
-    println!("┃ {opcode:04X} │ LD        │ [I], V{x:01X}    ┃");
+    println!("┃ {opcode:04X} │ LD        │ [I], V{x:01X}   ┃");
 
     for n in 0..=x {
         emulator.memory[emulator.i as usize + n] = emulator.vx[n];
@@ -416,7 +468,7 @@ pub fn f_x_55(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
 pub fn f_x_65(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
 
-    println!("┃ {opcode:04X} │ LD        │ V{x:01X}, [I]    ┃");
+    println!("┃ {opcode:04X} │ LD        │ V{x:01X}, [I]   ┃");
 
     for n in 0..=x {
         emulator.vx[n] = emulator.memory[emulator.i as usize + n]
