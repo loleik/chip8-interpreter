@@ -1,10 +1,5 @@
 use crate::system::Emulator;
 
-use sdl2::rect::Rect;
-use sdl2::pixels::Color;
-use std::time::Duration;
-use std::thread;
-
 // Clears both the canvas and display array.
 pub fn e_0(emulator: &mut Emulator) -> &mut Emulator {
     println!("┃ 00E0 │ CLS       │           ┃");
@@ -13,8 +8,7 @@ pub fn e_0(emulator: &mut Emulator) -> &mut Emulator {
         y.fill(0);
     }
 
-    emulator.canvas.set_draw_color(Color::RGB(0, 0, 0));
-    emulator.canvas.clear();
+    emulator.vram_updated = true;
 
     emulator
 }
@@ -322,22 +316,7 @@ pub fn d_x_y_n(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
         }
     }
 
-    for col in 0..64 {
-        for row in 0..32 {
-            if emulator.display[row][col] == 1 {
-                let rect = Rect::new(
-                    (col * 10) as i32,
-                    (row * 10) as i32, 
-                    10,
-                    10);
-                emulator.canvas.set_draw_color(Color::RGB(255, 179, 71));
-                emulator.canvas.fill_rect(rect).unwrap();
-            }
-        }
-    }
-    
-    emulator.canvas.present(); // Update the screen
-    thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+    emulator.vram_updated = true;
 
     emulator
 }

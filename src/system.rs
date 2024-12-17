@@ -43,7 +43,8 @@ pub struct Emulator {
     pub display: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT], // 64 x 32 display array.
     pub keypad: [bool; 16], // 16 key CHIP-8 keypad array.
     pub canvas: Canvas<Window>, // Canvas for drawing during execution.
-    pub last_timer_update: Instant
+    pub last_timer_update: Instant,
+    pub vram_updated: bool, // Flag for drawing the screen.
 }
 
 // Creates a new emulator instance (again I know, interpreter haha).
@@ -63,6 +64,7 @@ impl Emulator {
             keypad: [false; 16],
             canvas: canvas,
             last_timer_update: Instant::now(),
+            vram_updated: false,
         }
     }
 }

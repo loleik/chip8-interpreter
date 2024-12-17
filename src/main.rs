@@ -4,6 +4,8 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
+use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 
 // Map sdl2 keycodes to chip8 keycodes.
 fn map_keys(key: Keycode) -> Option<u8> {
@@ -58,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
 
     // Main loop, labeled for breaking on ESC.
     'running: loop {
-        emulator.memory[0x1FF] = 1;
+        //emulator.memory[0x1FF] = 1;
 
         // Even pump for checking keypresses.
         if let Some(event) =  event_pump.poll_event() {
@@ -86,6 +88,25 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
         decode(&mut emulator, instruction);
         
         update_timers(&mut emulator); // Update the timers.
+
+        if emulator.vram_updated {
+            for col in 0..64 {
+                for row in 0..32 {
+                    if emulator.display[row][col] == 1 {
+                        let rect = Rect::new(
+                            (col * 10) as i32,
+                            (row * 10) as i32, 
+                            10,
+                            10);
+                        emulator.canvas.set_draw_color(Color::RGB(255, 179, 71));
+                        emulator.canvas.fill_rect(rect).unwrap();
+                    }
+                }
+            }
+
+            emulator.canvas.present();
+            emulator.vram_updated = false;
+        }
 
         // Again, not really needed outside of the first few test ROMs.
         //cycles += 1;
