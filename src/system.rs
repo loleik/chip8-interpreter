@@ -3,8 +3,6 @@ use crate::opcodes::*;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use std::fs;
-use std::time::Instant;
-use std::time::Duration;
 
 // The common CHIP-8 font set.
 pub const FONT: [u8; 80] = [
@@ -43,8 +41,8 @@ pub struct Emulator {
     pub display: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT], // 64 x 32 display array.
     pub keypad: [bool; 16], // 16 key CHIP-8 keypad array.
     pub canvas: Canvas<Window>, // Canvas for drawing during execution.
-    pub last_timer_update: Instant,
     pub vram_updated: bool, // Flag for drawing the screen.
+    pub key_pressed: bool, // Flag for 0xFx0A.
 }
 
 // Creates a new emulator instance (again I know, interpreter haha).
@@ -63,38 +61,13 @@ impl Emulator {
             display: [[0; SCREEN_WIDTH]; SCREEN_HEIGHT],
             keypad: [false; 16],
             canvas: canvas,
-            last_timer_update: Instant::now(),
             vram_updated: false,
+            key_pressed: false,
         }
     }
 }
 
-pub fn update_timers(emulator: &mut Emulator) -> &mut Emulator {
-    let elapsed: std::time::Duration = emulator.last_timer_update.elapsed();
-
-    if elapsed >= Duration::from_secs_f32(1.0 / 60.0) {
-        if emulator.delay > 0 {
-            emulator.delay -= 1;
-        }
-
-        if emulator.sound > 0 {
-            emulator.sound -= 1;
-
-            if emulator.sound == 0 {
-                println!();
-                println!("BEEP");
-                println!();
-            }
-        }
-    }
-
-    emulator.last_timer_update = Instant::now();
-
-    emulator
-}
-
-// Function for loading the emulator struct, then loading the ROM into memory.
-// Eventually this will load the character font as well.
+// Function for loading the emulator struct, then loading the ROM and font into memory.
 pub fn load(path: &str, canvas: Canvas<Window>) -> Emulator {
     let mut emulator: Emulator = Emulator::new(canvas);
 
@@ -103,8 +76,8 @@ pub fn load(path: &str, canvas: Canvas<Window>) -> Emulator {
         Err(error) => panic!("Problem opening file: {error:?}")
     };
 
-    // This doesn't work, but I just moved on for now seen as it isn't needed yet.
-    //emulator.memory[0x0050..0x009F].copy_from_slice(&FONT);
+    // Loads the font into unused memory.
+    emulator.memory[0x0000..0x0050].copy_from_slice(&FONT);
 
     // See Cowgod's technical reference for the memory.
     emulator.memory[0x0200..0x0200 + data.len()].copy_from_slice(&data);
