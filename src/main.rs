@@ -50,7 +50,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
     let mut event_pump: sdl2::EventPump = sdl_content.event_pump().unwrap();
 
     // initialize the emulator struct with pass the ROM path and canvas.
-    let mut emulator: Emulator = load("roms/1dcell.ch8", canvas);
+    let mut emulator: Emulator = load("roms/piper.ch8", canvas);
 
     // Used for tracking cycles. Not really needed past the first few test ROMs.
     let mut _cycles: i32 = 0;
@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
      So cycles per frame is 540 / 60 = 9 cycles per frame.
     */
 
-    let cycles_per_frame: i32 = 540 / 60;
+    let cycles_per_frame: i32 = 600 / 60;
 
     // Main loop, labeled for breaking on ESC.
     'running: loop {
@@ -97,13 +97,11 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
         }
 
         // Complete target cycles per frame.
-        let mut i: i32 = 0;
-        loop {
+        let mut i: i32 = 1;
+        while i != cycles_per_frame {
             // Fetch the instruction, and pass it to the decode function along with the emulator.
             let instruction: u16 = fetch(&mut emulator);
             decode(&mut emulator, instruction);
-            
-            if i == cycles_per_frame { break; }
 
             i += 1
         }

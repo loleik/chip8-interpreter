@@ -424,9 +424,12 @@ pub fn f_x_1e(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
 
 // Set I = location of sprite for digit Vx.
 pub fn f_x_29(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
+    let x: u16 = (opcode & 0x0F00) >> 8;
+    let sprite_location: u16 = x * 5;
+
     //println!("┃ {opcode:04X} │ LD        │ F, V{x:01X}      ┃");
 
-    panic!("{opcode:04X}");
+    emulator.i = sprite_location;
 
     emulator
 }

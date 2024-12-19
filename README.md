@@ -13,9 +13,11 @@ I'm currently working on getting `5-quirks.ch8`working but I'm struggling a bit,
 With regards to games, I have tested:
 + `petdog.ch8`by SystemLogoff, which works as expected.
 + `caveexplorer.ch8`by JohnEarnest, which seems to have some issues with my interpreter.
-+ `piper.ch8`by Aeris, JordanMecom and LillianWang, which panics due to `0xF029`not being implemented yet.
-+ `1dcell.ch8`by SharpenedSpoon also panics due to `0xF029`.
++ `piper.ch8`by Aeris, JordanMecom and LillianWang, and `1dcell.ch8`by SharpenedSpoon run now with `0xF029`both run now, but not as espected. There are some issues with my implementation that I'm not quite sure how to debug at this point.
+
 These were all found at [John Earnest's CHIP-8 Archive](https://johnearnest.github.io/chip8Archive/?sort=platform).
+
+I am going to guess that the issues all come back to timing somehow, but I'm really not sure how to debug any of this.
 
 ## Planned:
 + Other opcodes, obviously.
