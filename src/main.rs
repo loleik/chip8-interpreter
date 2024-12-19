@@ -50,7 +50,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
     let mut event_pump: sdl2::EventPump = sdl_content.event_pump().unwrap();
 
     // initialize the emulator struct with pass the ROM path and canvas.
-    let mut emulator: Emulator = load("roms/1dcell.ch8", canvas);
+    let mut emulator: Emulator = load("roms/caveexplorer.ch8", canvas);
 
     // Used for tracking cycles. Not really needed past the first few test ROMs.
     let mut _cycles: i32 = 0;
@@ -68,12 +68,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
      So cycles per frame is 540 / 60 = 9 cycles per frame.
     */
 
-    let cycles_per_frame: i32 = 10000 / 60;
+    let cycles_per_frame: i32 = 1000 / 60;
 
     // Main loop, labeled for breaking on ESC.
     'running: loop {
         let frame_start = Instant::now();
-        //emulator.memory[0x1FF] = 1;
+        emulator.memory[0x1FF] = 1;
 
         // Even pump for checking keypresses.
         if let Some(event) =  event_pump.poll_event() {

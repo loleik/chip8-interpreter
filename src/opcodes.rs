@@ -205,6 +205,10 @@ pub fn eight_x_y_5(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
 // Set Vx = Vx SHR 1.
 pub fn eight_x_y_6(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
+    
+    // This is for the shifting quirk. Will eventually be configurable.
+    let y: usize = ((opcode & 0x00F0) >> 4) as usize;
+    emulator.vx[x] = emulator.vx[y];
 
     //println!("┃ {opcode:04X} │ SHR       │ V{x:01X} {{, V{y:01X}}} ┃");
 
@@ -240,6 +244,10 @@ pub fn eight_x_y_7(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
 // Set Vx = Vx SHL 1.
 pub fn eight_x_y_e(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     let x: usize = ((opcode & 0x0F00) >> 8) as usize;
+
+    // This is for the shifting quirk. Will eventually be configurable.
+    let y: usize = ((opcode & 0x00F0) >> 4) as usize;
+    emulator.vx[x] = emulator.vx[y];
 
     //println!("┃ {opcode:04X} │ SHL       │ V{x:01X} {{, V{y:01X}}} ┃");
 
@@ -458,9 +466,10 @@ pub fn f_x_55(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     //println!("┃ {opcode:04X} │ LD        │ [I], V{x:01X}   ┃");
 
     for n in 0..=x {
-        emulator.memory[emulator.i as usize + n] = emulator.vx[n];
-        //emulator.i += 1; // Increment index register. Required by quirks.
+        emulator.memory[emulator.i as usize] = emulator.vx[n];
+        emulator.i += 1; // Needed for memory quirk.
     }
+    //emulator.i = x as u16;
 
     emulator
 }
@@ -472,8 +481,8 @@ pub fn f_x_65(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     //println!("┃ {opcode:04X} │ LD        │ V{x:01X}, [I]   ┃");
 
     for n in 0..=x {
-        emulator.vx[n] = emulator.memory[emulator.i as usize + n];
-        //emulator.i += 1; // Increment index register. Required by quirks.
+        emulator.vx[n] = emulator.memory[emulator.i as usize];
+        emulator.i += 1 // Needed for memory quirk.
     }
 
     emulator

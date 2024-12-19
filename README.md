@@ -8,12 +8,12 @@ My implementation currently passes `1-chip8-logo.ch8`, `2-ibm-logo.ch8`, `3-cora
 
 `7-beep.ch8`seems to work mostly. It prints beep and flashes the speaker icon as expected (I haven't implemented actual sound yet).
 
-I'm currently working on getting `5-quirks.ch8`working. One issue I was having seems to be fixed by modifying the collission flag in the draw instruction. It wasn't correctly resetting the VF register to 0.
+I'm currently working on getting `5-quirks.ch8`working. I am slightly confused by the `Disp. Clear` and `Clipping` quirks.
 
 With regards to games, I have tested:
 + `petdog.ch8`by SystemLogoff, which works as expected.
 + `caveexplorer.ch8`by JohnEarnest, which seems to have some issues with my interpreter.
-+ `piper.ch8`by Aeris, JordanMecom and LillianWang functions to some degree. Colliding with objects correctly makes them disappear but nothing else.
++ `piper.ch8`by Aeris, JordanMecom and LillianWang and `caveexplorer.ch8`by JohnEarnest actually seem to function properly when a clock speed is set around 1000Hz, but score displaying in the bottom of piper particularly doesn't work.
 + `1dcell.ch8`by SharpenedSpoon works when the speed is set significatnly higher.
 + `br8kout.ch8`by SharpenedSpoon works as expected.
 
