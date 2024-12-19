@@ -8,16 +8,18 @@ My implementation currently passes `1-chip8-logo.ch8`, `2-ibm-logo.ch8`, `3-cora
 
 `7-beep.ch8`seems to work mostly. It prints beep and flashes the speaker icon as expected (I haven't implemented actual sound yet).
 
-I'm currently working on getting `5-quirks.ch8`working but I'm struggling a bit, even outside of the quirks themselves. There's strange behaviour with the loading bar for example, unless that's how it's intended to look.
+I'm currently working on getting `5-quirks.ch8`working. One issue I was having seems to be fixed by modifying the collission flag in the draw instruction. It wasn't correctly resetting the VF register to 0.
 
 With regards to games, I have tested:
 + `petdog.ch8`by SystemLogoff, which works as expected.
 + `caveexplorer.ch8`by JohnEarnest, which seems to have some issues with my interpreter.
-+ `piper.ch8`by Aeris, JordanMecom and LillianWang, and `1dcell.ch8`by SharpenedSpoon both run now with `0xF029`, but not as espected. There are some issues with my implementation that I'm not quite sure how to debug at this point.
++ `piper.ch8`by Aeris, JordanMecom and LillianWang functions to some degree. Colliding with objects correctly makes them disappear but nothing else.
++ `1dcell.ch8`by SharpenedSpoon works when the speed is set significatnly higher.
++ `br8kout.ch8`by SharpenedSpoon works as expected.
 
 These were all found at [John Earnest's CHIP-8 Archive](https://johnearnest.github.io/chip8Archive/?sort=platform).
 
-I am going to guess that the issues all come back to timing somehow, but I'm really not sure how to debug any of this.
+Overall, it seems to run slower than other interpreters I've tried, and there is an issue where any score that should be displayed by a game seems to be stuck at `012`which is strange.
 
 ## Planned:
 + Audio.

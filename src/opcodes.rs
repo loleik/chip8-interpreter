@@ -310,6 +310,7 @@ pub fn d_x_y_n(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
     //println!("┃ {opcode:04X} │ DRW       │ V{x:01X}, V{y:01X}, {n:01X} ┃");
 
     let sprite: &[u8] = &emulator.memory[(i as usize)..((i + n) as usize)];
+    let mut collission: bool = false;
     
     for (row, &byte) in sprite.iter().enumerate() {
         let screen_y: usize = (vy + row) % 32;
@@ -319,12 +320,15 @@ pub fn d_x_y_n(opcode: u16, emulator: &mut Emulator) -> &mut Emulator {
             let sprite_bit: u8 = (byte >> (7 - bit )) & 1;
 
             if emulator.display[screen_y][screen_x] == 1 && sprite_bit == 1 {
-                emulator.vx[15] = 1;
+                collission = true;
             }
 
             emulator.display[screen_y][screen_x] ^= sprite_bit;
         }
     }
+
+    if collission { emulator.vx[0xF] = 1 }
+    else { emulator.vx[0xF] = 0 }
 
     emulator.vram_updated = true;
 
