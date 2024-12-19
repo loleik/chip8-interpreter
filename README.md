@@ -20,7 +20,5 @@ These were all found at [John Earnest's CHIP-8 Archive](https://johnearnest.gith
 I am going to guess that the issues all come back to timing somehow, but I'm really not sure how to debug any of this.
 
 ## Planned:
-+ Other opcodes, obviously.
 + Audio.
-+ CHIP-8 font set.
 + CLAP interface for passing ROMs.
