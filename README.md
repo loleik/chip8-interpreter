@@ -1,4 +1,11 @@
 # CHIP-8 Interpreter
+## Usage
+`lolei-chip8 --rom <ROM>` or `cargo run -- --rom <ROM>`. Options:
++ `-r`, `--rom <ROM>`  Path to the ROM file, e.g. `-r roms/2-ibm-logo.ch8`
++ `-h`, `--help`       Print help
++ `-V`, `--version`    Print version
+
+## About
 This is my CHIP-8 interpreter written in rust. Just intended as a small project to learn some emulation dev skills. The following resources have been helpful, and are what the order of developement have been centered around:
 
 + [Timendus' CHIP-8 Test Suite](https://github.com/Timendus/chip8-test-suite)
@@ -23,4 +30,3 @@ Overall, it seems to run slower than other interpreters I've tried, and there is
 
 ## Planned:
 + Audio.
-+ CLAP interface for passing ROMs.

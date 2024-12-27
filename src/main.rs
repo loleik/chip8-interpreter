@@ -8,6 +8,15 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use std::time::{Duration, Instant};
 use std::thread;
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Path to the ROM file, e.g. roms/2-ibm-logo.ch8
+    #[arg(short, long)]
+    rom: String,
+}
 
 // Map sdl2 keycodes to chip8 keycodes.
 fn map_keys(key: Keycode) -> Option<u8> {
@@ -49,8 +58,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + 'static>> {
 
     let mut event_pump: sdl2::EventPump = sdl_content.event_pump().unwrap();
 
+    let args = Args::parse();
+
     // initialize the emulator struct with pass the ROM path and canvas.
-    let mut emulator: Emulator = load("roms/caveexplorer.ch8", canvas);
+    let mut emulator: Emulator = load(&args.rom, canvas);
 
     // Used for tracking cycles. Not really needed past the first few test ROMs.
     let mut _cycles: i32 = 0;
